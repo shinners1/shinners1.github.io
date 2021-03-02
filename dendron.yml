@@ -2,7 +2,7 @@ version: 1
 vaults:
     -
         fsPath: vault
-useFMTitle: true
+# useFMTitle: true
 site:
     copyAssets: true
     siteHierarchies:
@@ -10,6 +10,8 @@ site:
     siteRootDir: docs
     usePrettyRefs: true
     title: Dendron
+    site:
+        siteUrl: https://shinners1.github.io/
     description: Personal knowledge space
     duplicateNoteBehavior:
         action: useVault
