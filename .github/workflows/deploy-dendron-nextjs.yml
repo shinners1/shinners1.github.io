@@ -1,0 +1,49 @@
+name: Dendron
+
+on:
+  schedule:
+  - cron: "0 0 * * *" # every 24hr at midnight
+
+jobs:
+  build-nextjs-site:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clone Dendron (main) repo
+      uses: actions/checkout@v2
+      with:
+        repository: shinners1/shinners1.github.io
+        token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+        path: 'main'
+
+    - name: Clone Dendron (publishable) repo
+      uses: actions/checkout@v2
+      with:
+        path: 'main/public/notes'
+        ref: master
+        fetch-depth: 0
+
+    - name: Delete publishable cached files if present
+      run: "rm -rf .next && rm -rf docs && rm -rf node_modules"
+      working-directory: ./main/public/notes
+
+    - name: Install node dependencies of publishable
+      run: npm install @dendronhq/dendron-cli@latest
+      working-directory: ./main/public/notes
+
+    - name: Clone the Dendron Next.js repository and install dependencies
+      run: npx dendron publish init
+      working-directory: ./main/public/notes
+
+    - name: Build static HTML and create the Nextjs static website
+      run: npx dendron publish export --target github --yes
+      working-directory: ./main/public/notes
+
+    - name: 🚀 Deploy site to GH Pages
+      uses: peaceiris/actions-gh-pages@v3.8.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: pages
+        publish_dir: main/public/notes # deploy publishable directory in the runner to pages branch
+        force_orphan: true
+        enable_jekyll: false
+        cname: "shinners1.github.io"
